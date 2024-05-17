@@ -111,12 +111,12 @@ class AutogradCompilerInstance:
         backward_idx: int,
     ):
         assert self.hooks_proxy is not None
-        backward_fn = self.hooks_proxy[backward_idx]  # type: ignore[index]
+        backward_c_function = self.hooks_proxy[backward_idx]  # type: ignore[index]
         proxies = self.fx_tracer.create_proxy(
             kind="call_function",
             target=call_backward,
             args=(
-                backward_fn,
+                backward_c_function,
                 self.to_proxy(saved_tensors),
                 *self.to_proxy(inputs),
             ),
@@ -319,3 +319,11 @@ def disable():
         if prior:
             compiled_autograd_enabled = True
         torch._C._dynamo.compiled_autograd.set_autograd_compiler(prior)
+
+
+# return to starting state of a new process
+def reset() -> None:
+    compiled_autograd_enable = False
+    assert compiled_autograd_enabled_count == 0
+    torch._C._dynamo.compiled_autograd.set_autograd_compiler(None)
+    torch._C._dynamo.compiled_autograd.set_verbose_logging(False)

@@ -1504,6 +1504,14 @@ class InstructionTranslatorBase(
         assert obj.mutable_local
         return obj.call_method(self, "add", [v], {})
 
+    def SET_UPDATE(self, inst):
+        v = self.pop()
+        assert inst.argval > 0
+        obj = self.stack[-inst.arg]
+        assert isinstance(obj, SetVariable)
+        assert obj.mutable_local
+        obj.call_method(self, "update", [v], {})
+
     def LIST_APPEND(self, inst):
         v = self.pop()
         assert inst.argval > 0
@@ -2315,7 +2323,6 @@ class InstructionTranslator(InstructionTranslatorBase):
                 )
                 argnames_ctx_vars.append((name, target_values))
                 # Replace the local with the context class
-                cg.append_output(create_instruction("LOAD_FAST", argval=name))
                 ctx.reconstruct_type(cg)
                 cg.append_output(create_instruction("STORE_FAST", argval=name))
 
