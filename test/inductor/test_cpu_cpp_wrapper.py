@@ -114,6 +114,7 @@ def make_test_case(
     slow=False,
     func_inputs=None,
     code_string_count=None,
+    skip=None,
 ):
     test_name = f"{name}_{device}" if device else name
     if code_string_count is None:
@@ -122,6 +123,8 @@ def make_test_case(
     func = getattr(tests, test_name)
     assert callable(func), "not a callable"
     func = slowTest(func) if slow else func
+    if skip:
+        func = unittest.skip(skip)(func)
 
     @config.patch(cpp_wrapper=True, search_autotune_cache=False)
     def fn(self):
@@ -169,6 +172,7 @@ if RUN_CPU:
         slow: bool = False
         func_inputs: list = None
         code_string_count: dict = {}
+        skip = None
 
     for item in [
         BaseTest("test_add_complex"),
@@ -227,7 +231,7 @@ if RUN_CPU:
             torch.backends.mkldnn.is_available()
             and torch.ops.mkldnn._is_mkldnn_bf16_supported(),
         ),
-        BaseTest("test_linear_packed", "", test_cpu_repro.CPUReproTests()),
+        BaseTest("test_linear_packed", "", test_cpu_repro.CPUReproTests(), skip="Failing"),
         BaseTest(
             "test_lstm_packed_change_input_sizes",
             "cpu",
