@@ -276,7 +276,7 @@ if(NOT DEFINED USE_VULKAN)
       "ANDROID" OFF)
 endif()
 
-option(USE_SLEEF_FOR_ARM_VEC256 "Use sleef for arm" ON)
+option(USE_SLEEF_FOR_ARM_VEC256 "Use sleef for arm" OFF)
 option(USE_SOURCE_DEBUG_ON_MOBILE "Enable" ON)
 option(USE_LITE_INTERPRETER_PROFILER "Enable" ON)
 option(USE_VULKAN_FP16_INFERENCE "Vulkan - Use fp16 inference" OFF)
@@ -791,6 +791,13 @@ if(USE_PYTORCH_QNNPACK)
 endif()
 
 if(USE_SLEEF_FOR_ARM_VEC256)
+  string(APPEND CMAKE_CXX_FLAGS " -DAT_BUILD_ARM_VEC256_WITH_SLEEF")
+  add_definitions(-DAT_BUILD_ARM_VEC256_WITH_SLEEF)
+endif()
+
+# Enable sleef on macOS with Apple silicon by default
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") AND (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm64"))
+  message(STATUS "Running on macOS with Apple silicon")
   string(APPEND CMAKE_CXX_FLAGS " -DAT_BUILD_ARM_VEC256_WITH_SLEEF")
   add_definitions(-DAT_BUILD_ARM_VEC256_WITH_SLEEF)
 endif()
