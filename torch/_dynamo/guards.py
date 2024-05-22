@@ -819,7 +819,12 @@ class GuardBuilder(GuardBuilderBase):
             )
         elif istype(
             source,
-            (OptimizerSource, NNModuleSource, NotNNModuleSource, FSDPNNModuleSource),
+            (
+                OptimizerSource,
+                NNModuleSource,
+                NotNNModuleSource,
+                FSDPNNModuleSource,
+            ),
         ):
             assert base_guard_manager  # to make mypy happy
             return base_guard_manager

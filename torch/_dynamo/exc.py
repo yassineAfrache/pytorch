@@ -171,6 +171,10 @@ class UserStopIteration(TorchDynamoException):
             self.value = None
 
 
+class UserAttributeErrorException(TorchDynamoException):
+    pass
+
+
 class UnsafeScriptObjectError(TorchDynamoException):
     pass
 
