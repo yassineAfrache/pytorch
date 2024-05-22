@@ -378,19 +378,8 @@ class UserDefinedClassVariable(UserDefinedVariable):
                 else UserDefinedObjectVariable,
                 {},
             )
-            if (
-                inspect.getattr_static(self.value, "__init__", None)
-                is torch.nn.Module.__init__
-            ):
-                tx.output.side_effects.store_attr(
-                    var,
-                    "__call_nn_module_init",
-                    variables.ConstantVariable.create(True),
-                )
-                return var
-            else:
-                var.call_method(tx, "__init__", args, kwargs)
-                return var
+            var.call_method(tx, "__init__", args, kwargs)
+            return var
         elif variables.CustomizedDictVariable.is_matching_cls(self.value):
             options = {"mutable_local": MutableLocal()}
             return variables.CustomizedDictVariable.create(
@@ -635,6 +624,10 @@ class UserDefinedObjectVariable(UserDefinedVariable):
                     else AttrSource(AttrSource(self.source, "__class__"), name)
                 )
                 # TODO(jansel): add a guard to check for monkey patching?
+                from ..mutation_guard import unpatched_nn_module_init
+
+                if method is torch.nn.Module.__init__:
+                    method = unpatched_nn_module_init
                 return UserMethodVariable(method, self, source=source).call_function(
                     tx, args, kwargs
                 )
@@ -991,6 +984,15 @@ class UserDefinedObjectVariable(UserDefinedVariable):
 
         try:
             self._getattr_static(name)
+            if isinstance(self, variables.UnspecializedNNModuleVariable):
+                result = tx.inline_user_function_return(
+                    variables.UserFunctionVariable(self.value.__getattr__.__func__),
+                    [self, variables.ConstantVariable.create(name)],
+                    {},
+                )
+                return variables.ConstantVariable.create(
+                    not isinstance(result, variables.DeletedVariable)
+                )
             return variables.ConstantVariable.create(True)
         except AttributeError:
             return variables.ConstantVariable.create(False)
