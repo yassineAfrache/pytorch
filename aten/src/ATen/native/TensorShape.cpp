@@ -31,6 +31,7 @@
 #include <c10/util/SmallVector.h>
 #include <c10/util/accumulate.h>
 #include <c10/util/irange.h>
+#include <c10/core/impl/COW.h>
 
 #ifndef AT_PER_OPERATOR_HEADERS
 #include <ATen/Functions.h>
@@ -150,6 +151,7 @@
 #include <ATen/ops/select_native.h>
 #include <ATen/ops/select_scatter_native.h>
 #include <ATen/ops/set_native.h>
+#include <ATen/ops/_simulate_lazy_clone_native.h>
 #include <ATen/ops/slice.h>
 #include <ATen/ops/slice_backward_native.h>
 #include <ATen/ops/slice_copy_native.h>
@@ -1629,18 +1631,34 @@ Tensor alias_with_sizes_and_strides(
   return self_;
 }
 
+// TODO: Move this out so other files can use it
+static Tensor apply_cow_(const Tensor& self) {
+  StorageImpl* storage_impl = self.storage().unsafeGetStorageImpl();
+  c10::Storage new_storage;
+
+  if (c10::impl::cow::get_future_copy_instead_of_conditional_view()) {
+    new_storage = c10::impl::cow::lazy_clone_storage(*storage_impl);
+  } else {
+    new_storage = c10::impl::cow::simulate_lazy_clone_storage(*storage_impl);
+  }
+  self.unsafeGetTensorImpl()->set_storage_keep_dtype(new_storage);
+  return self;
+}
+
 Tensor reshape_symint(const Tensor& self, c10::SymIntArrayRef proposed_shape) {
   if (self.is_sparse()) {
     AT_ERROR("reshape is not implemented for sparse tensors");
   }
 
+  // TODO: Make the changes in this file less verbose
   if (self.is_contiguous() && !self.is_mkldnn()) {
-    return self.view_symint(proposed_shape);
+    return apply_cow_(self.view_symint(proposed_shape));
   }
 
   c10::SymDimVector shape = infer_size_dv(proposed_shape, self.sym_numel());
 
   if (self.is_mkldnn()) {
+    // TODO: Will need to do this one
     return at::_mkldnn_reshape(self, C10_AS_INTARRAYREF_SLOW(shape));
   }
 
@@ -1665,9 +1683,9 @@ Tensor reshape_symint(const Tensor& self, c10::SymIntArrayRef proposed_shape) {
     // We need to do the checks here instead of in `native_functions.yaml`
     // to preserve backwards compatibility.
     if (!self.is_xla() && !self.is_lazy() && !self.is_ipu() && !at::isTensorSubclassLike(self)) {
-      return self._reshape_alias_symint(shape, stride.value());
+      return apply_cow_(self._reshape_alias_symint(shape, stride.value()));
     } else {
-      return self.view_symint(shape);
+      return apply_cow_(self.view_symint(shape));
     }
   }
   return at::_unsafe_view_symint(self.clone(at::MemoryFormat::Contiguous), shape);
@@ -1699,6 +1717,7 @@ Tensor reshape(const Tensor& self, IntArrayRef proposed_shape) {
   DimVector shape = infer_size_dv(proposed_shape, self.numel());
 
   if (self.is_mkldnn()) {
+    // TODO: Instrument this
     return at::_mkldnn_reshape(self, shape);
   }
 
@@ -1723,9 +1742,9 @@ Tensor reshape(const Tensor& self, IntArrayRef proposed_shape) {
     // We need to do the checks here instead of in `native_functions.yaml`
     // to preserve backwards compatibility.
     if (!self.is_xla() && !self.is_lazy() && !self.is_ipu()) {
-      return self._reshape_alias(shape, stride.value());
+      return apply_cow_(self._reshape_alias(shape, stride.value()));
     } else {
-      return self.view(shape);
+      return apply_cow_(self.view(shape));
     }
   }
   return at::_unsafe_view(self.clone(at::MemoryFormat::Contiguous), shape);
