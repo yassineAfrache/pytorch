@@ -1029,9 +1029,6 @@ class TritonKernel(SIMDKernel):
             and self.numels[-1] >= 256
         )
 
-    def generate_assert(self, check):
-        return torch.version.hip is None and super().generate_assert(check)
-
     @property
     def assert_function(self) -> str:
         return "tl.device_assert"
@@ -1078,6 +1075,28 @@ class TritonKernel(SIMDKernel):
         # workaround https://github.com/openai/triton/issues/2814
         value = f"{value}.to({triton_store_type(V.graph.get_dtype(name))})"
         return f"tl.store({block_ptr}, {value}{other})"
+
+    def check_bounds(
+        self,
+        buffer: IndentedBuffer,
+        expr: sympy.Expr,
+        size: sympy.Expr,
+        lower: bool,
+        upper: bool,
+    ):
+        assert isinstance(expr, sympy.Expr)
+        indexing = self.indexing(expr, block_ptr=False)
+        assert isinstance(indexing, IndexingOptions)
+
+        index_str = indexing.index_str
+        mask_str = indexing.mask_str if indexing.has_mask() else None
+        size_str = V.kernel.sexpr(self.rename_indexing(size)) if upper else None
+
+        # expr is already wrapped
+        line = self.indirect_assert(
+            index_str, "0" if lower else None, size_str, mask_str
+        )
+        self.cse.generate(buffer, line, assignment=False)
 
     def load(self, name: str, index: sympy.Expr):
         var = self.args.input(name)
@@ -1173,6 +1192,7 @@ class TritonKernel(SIMDKernel):
         else:
             load_buffer = self.loads
 
+        self.issue_check_bounds(load_buffer, original_index)
         result_var = self.cse.generate(load_buffer, line)
         assert isinstance(result_var, TritonCSEVariable)
         result_var.mask_vars = indexing.mask_vars  # type: ignore[assignment]
@@ -1222,6 +1242,7 @@ class TritonKernel(SIMDKernel):
             line = f"tl.atomic_add({var} + ({indexing.index_str}), {value}, {indexing.mask_str})"
         else:
             raise NotImplementedError(f"store mode={mode}")
+        self.issue_check_bounds(self.stores, original_index)
         self.stores.writeline(DeferredLine(name, line))
         if advance_block_ptr:
             self.stores.writeline(advance_block_ptr)
@@ -1514,6 +1535,7 @@ class TritonKernel(SIMDKernel):
         self.inside_reduction = True
         var = self.args.output(name)
 
+        self.issue_check_bounds(self.suffix, index)
         if isinstance(indexing, BlockPtrOptions):
             self.suffix.writeline(
                 DeferredLine(

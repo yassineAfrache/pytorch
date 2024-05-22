@@ -18,7 +18,7 @@ import sympy
 from sympy import Expr
 
 from torch.fx.experimental.symbolic_shapes import ShapeEnv
-from torch.utils._sympy.functions import FloorDiv, ModularIndexing
+from torch.utils._sympy.functions import Boxed, FloorDiv, ModularIndexing
 from torch.utils._sympy.symbol import symbol_is_type, SymT
 from torch.utils._sympy.value_ranges import bound_sympy
 
@@ -158,6 +158,9 @@ class SizeVarAllocator:
                 return FloorDiv(base, divisor)
             return ModularIndexing(base, divisor, modulus)
 
+        def visit_boxed(expr):
+            return Boxed(self._simplify_with_ranges(expr, var_ranges))
+
         if expr.has(ModularIndexing):
             expr = expr.replace(
                 ModularIndexing(
@@ -175,6 +178,14 @@ class SizeVarAllocator:
                     sympy.Wild("divisor"),
                 ),
                 visit_indexing_div,
+            )
+
+        if expr.has(Boxed):
+            expr = expr.replace(
+                Boxed(
+                    sympy.Wild("expr"),
+                ),
+                visit_boxed,
             )
 
         if expr != original_expr:
@@ -665,3 +676,6 @@ class SimplifyIndexing(V.WrapperHandler):  # type: ignore[name-defined]
 
     def index_expr(self, index, dtype):
         return self._inner.index_expr(self._simplify(index), dtype)
+
+    def lazy_check_bounds(self, index, size, lower, upper):
+        return self._inner.check_bounds(self._simplify(index), size, lower, upper)

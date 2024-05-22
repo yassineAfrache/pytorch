@@ -1683,12 +1683,41 @@ class CppKernel(Kernel):
             index, itervar
         )
 
+    def var_ranges(self):
+        return dict(zip(self.itervars, self.ranges))
+
+    def check_bounds(
+        self,
+        buffer: IndentedBuffer,
+        expr: sympy.Expr,
+        size: sympy.Expr,
+        lower: bool,
+        upper: bool,
+    ):
+        # Swap compute with buffer
+        prior = V.kernel.compute
+        try:
+            V.kernel.compute = buffer
+            csevar = ops.index_expr(expr, torch.int32).value
+        finally:
+            V.kernel.compute = prior
+
+        size_str = V.kernel.sexpr(self.rename_indexing(size)) if upper else None
+
+        line = self.indirect_assert(csevar, "0" if lower else None, size_str)
+        self.cse.generate(buffer, line, assignment=False)
+
     def load(self, name: str, index: sympy.Expr):
         var = self.args.input(name)
+        original_index = index
         index = self.rename_indexing(index)
         line = f"{var}[{cexpr_index(index)}]"
         if V.graph.get_dtype(name) in [torch.float16]:
             line = f"static_cast<float>({line})"
+
+        # Issue necessary TORCH_CHECKs for the indirect indexing
+        self.issue_check_bounds(self.loads, original_index)
+
         csevar = self.cse.generate(self.loads, line)
         csevar.update_on_args("load", (name, index), {})
         return csevar
@@ -1696,6 +1725,7 @@ class CppKernel(Kernel):
     def store(self, name, index, value, mode=None):
         assert "buf" in name
         var = self.args.output(name)
+        original_index = index
         self.cache_fp32_cse_var_before_lowp_store(value)
         index = self.rename_indexing(index)
         if mode is None:
@@ -1710,6 +1740,10 @@ class CppKernel(Kernel):
                 line = f"atomic_add(&{var}[{cexpr_index(index)}], {value});"
         else:
             raise NotImplementedError(f"store mode={mode}")
+
+        # Issue necessary TORCH_CHECKs for the indirect indexing
+        self.issue_check_bounds(self.stores, original_index)
+
         self.stores.writeline(DeferredLine(name, line))
 
     def reduction(self, dtype, src_dtype, reduction_type, value):
@@ -2121,6 +2155,8 @@ class CppVecKernel(CppKernel):
         :return: a CppCSEVariable that represents the loaded vector or None if it is a store.
         """
         assert not store_value or var is not None, "store var must be provided"
+        original_index = index
+        index = self.rename_indexing(index)
 
         if buffer is None:
             buffer = self.loads
@@ -2177,6 +2213,13 @@ class CppVecKernel(CppKernel):
                 if indirect_var.is_vec:
                     array_var = vec_to_array(indirect_var)
                     replacements[indirect_var] = f"{array_var}[{itervar_inner}]"
+
+            # TODO Refactor. This function does way too many things.
+            # If it's a load or a store
+            if var:
+                # Issue necessary TORCH_CHECKs for the indirect indexing
+                self.issue_check_bounds(buffer, original_index)
+
             index = self.scale_index_with_offset(
                 index, itervar_idx=self.tiling_idx, offset=itervar_inner
             )
@@ -2228,6 +2271,7 @@ class CppVecKernel(CppKernel):
     def load(self, name: str, index: sympy.Expr):
         opt_ctx: OptimizationContext = get_current_node_opt_ctx()
         var = self.args.input(name)
+        original_index = index
         index = self.rename_indexing(index)
         dtype = V.graph.get_dtype(name)
         tiling_var = self.itervars[self.tiling_idx]
@@ -2235,12 +2279,15 @@ class CppVecKernel(CppKernel):
         if stride == 0:
             # load scalar and lazily broadcast it on demand
             return super().load(name, index)
-        elif stride == 1:
-            # load contiguously
-            line = self._get_vec_load_line(var, index, dtype, self._load_mask)
-            csevar = self.cse.generate(self.loads, line)  # type: ignore[assignment]
         else:
-            csevar = self._load_or_store_non_contiguous(var, index, dtype)  # type: ignore[assignment]
+            # Issue necessary TORCH_CHECKs for the indirect indexing
+            if stride == 1:
+                # load contiguously
+                line = self._get_vec_load_line(var, index, dtype, self._load_mask)
+                self.issue_check_bounds(self.loads, original_index)
+                csevar = self.cse.generate(self.loads, line)  # type: ignore[assignment]
+            else:
+                csevar = self._load_or_store_non_contiguous(var, original_index, dtype)  # type: ignore[assignment]
         assert isinstance(csevar, CppCSEVariable)
         csevar.update_on_args("load", (name, index), {})
         csevar.is_vec = True
@@ -2266,17 +2313,21 @@ class CppVecKernel(CppKernel):
             isinstance(value, CppCSEVariable) and value.is_vec
         ), value
         tiling_var = self.itervars[self.tiling_idx]
-        var_expr = f"{var} + {cexpr_index(index)}"
+        original_index = index
+        index = self.rename_indexing(index)
         stride = self._try_get_const_stride(index, tiling_var)
         code = IndentedBuffer()
         if stride == 1:
+            # Issue necessary TORCH_CHECKs for the indirect indexing
+            self.issue_check_bounds(code, original_index)
+            var_expr = f"{var} + {cexpr_index(index)}"
             if dtype == torch.float:
                 code.writeline(f"{value}.store({var_expr});")
             else:
                 code.writeline(f"{value}.store({var_expr}, {self.tiling_factor});")
         else:
             self._load_or_store_non_contiguous(
-                var, index, dtype, buffer=code, store_value=value
+                var, original_index, dtype, buffer=code, store_value=value
             )
         return code
 
@@ -2290,8 +2341,8 @@ class CppVecKernel(CppKernel):
         opt_ctx: OptimizationContext = get_current_node_opt_ctx()
         var = self.args.output(name)
         self.cache_fp32_cse_var_before_lowp_store(value)
-        index = self.rename_indexing(index)
         code = self._get_store_line(value, var, index, V.graph.get_dtype(name))
+
         self.stores.splice(code.map(lambda x: DeferredLine(name, x)))
 
     def reduction(self, dtype, src_dtype, reduction_type, value):
@@ -2395,6 +2446,7 @@ class CppVecKernel(CppKernel):
         return result
 
     def store_reduction(self, name, index, value):
+        original_index = index
         index = self.rename_indexing(index)
         var = self.args.output(name)
         out_dtype = V.graph.get_dtype(name)
@@ -2405,6 +2457,9 @@ class CppVecKernel(CppKernel):
             code.writeline(
                 f"{var}[{cexpr_index(index)}] = static_cast<{DTYPE_TO_CPP[out_dtype]}>({value});"
             )
+
+            # Issue necessary TORCH_CHECKs for the indirect indexing
+            self.issue_check_bounds(self.reduction_suffix, original_index)
         else:
             # Vertical reduction
             if out_dtype != dtype:
@@ -2413,7 +2468,8 @@ class CppVecKernel(CppKernel):
                     f"auto {converted_value} = at::vec::convert<{DTYPE_TO_CPP[out_dtype]}>({value});"
                 )
                 value = converted_value
-            code.splice(self._get_store_line(value, var, index, out_dtype))
+            # get_store_line does the TORCH_CHECKs
+            code.splice(self._get_store_line(value, var, original_index, out_dtype))
         self.reduction_suffix.splice(code.map(lambda x: DeferredLine(name, x)))
 
     def broadcast(self, scalar_var: CppCSEVariable) -> CppCSEVariable:
@@ -2787,6 +2843,11 @@ class CppVecKernelChecker(CppVecKernel):
             return tuple([self.simd_vec] * 3)
         return self.simd_vec
 
+    def check_bounds_lazy(
+        self, expr: sympy.Expr, size: sympy.Expr, lower: bool, upper: bool
+    ):
+        return self.simd_vec
+
     def store_reduction(self, name, index, value):
         return self.simd_vec
 
@@ -2835,6 +2896,12 @@ class CppVecKernelChecker(CppVecKernel):
             @staticmethod
             def store_reduction(name, index, value):
                 return self.store_reduction(name, index, value)
+
+            @staticmethod
+            def check_bounds_lazy(
+                expr: sympy.Expr, size: sympy.Expr, lower: bool, upper: bool
+            ):
+                return self.check_bounds_lazy(expr, size, lower, upper)
 
             @staticmethod
             def constant(val, dtype):
