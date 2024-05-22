@@ -1349,6 +1349,7 @@ class CppVecOverrides(CppOverrides):
     def to_dtype(x, dtype, src_dtype=None):
         assert dtype in [
             torch.bool,
+            torch.float64,
             torch.float,
             torch.bfloat16,
             torch.float16,
@@ -2322,7 +2323,7 @@ class CppVecKernel(CppKernel):
             "welford_combine",
         }
         assert dtype == src_dtype
-        assert dtype in [torch.float, torch.int64]
+        assert dtype in [torch.float64, torch.float, torch.int64]
         assert isinstance(value, CppCSEVariable), value
 
         if not value.is_vec:
@@ -2387,8 +2388,8 @@ class CppVecKernel(CppKernel):
             # Horizontal reduction
             if is_welford_reduction(reduction_type):
                 assert (
-                    self._get_num_vectors(dtype) == 1
-                ), "Welford reduction does not support VectorizedN (N>1)"
+                    self._get_num_vectors(dtype) in [1, 2]
+                ), "Welford reduction does not support VectorizedN (N>2)"
                 next_value = f"welford_vec_reduce_all({acc_vec})"
             else:
                 reduce_all_body = (
@@ -2729,6 +2730,7 @@ class CppVecKernelChecker(CppVecKernel):
 
         # Cache all the load result
         self.supported_dtypes: List[torch.dtype] = [
+            torch.float64,
             torch.float,
             torch.bfloat16,
             torch.float16,
@@ -2794,6 +2796,7 @@ class CppVecKernelChecker(CppVecKernel):
     def reduction(self, dtype, src_dtype, reduction_type, value):
         if not (
             (dtype == torch.float and src_dtype == torch.float)
+            or (dtype == torch.double and src_dtype == torch.double)
             or (dtype == torch.int64 and src_dtype == torch.int64)
             and reduction_type in VECTORIZABLE_RTYPES
         ):

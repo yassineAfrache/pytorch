@@ -3612,6 +3612,42 @@ class CPUReproTests(TestCase):
         self.common(fn, (x,))
         check_metrics_vec_kernel_count(1)
 
+    def test_double_pointwise_vec(self):
+        def fn(x):
+            return x * x
+
+        x = torch.randn((32, 32), dtype=torch.double)
+        metrics.reset()
+        self.common(fn, (x,))
+        check_metrics_vec_kernel_count(1)
+
+    def test_double_reduction_vec(self):
+        def fn(x):
+            return x.sum(dim=1)
+
+        x = torch.randn((32, 32), dtype=torch.double)
+        metrics.reset()
+        self.common(fn, (x,))
+        check_metrics_vec_kernel_count(1)
+
+    def test_convert_fp32_to_double_vec(self):
+        def fn(x):
+            return x.to(torch.double)
+
+        x = torch.randn(32, 32)
+        metrics.reset()
+        self.common(fn, (x,))
+        check_metrics_vec_kernel_count(1)
+
+    def test_convert_double_to_fp32_vec(self):
+        def fn(x):
+            return x.to(torch.float32)
+
+        x = torch.randn((32, 32), dtype=torch.double)
+        metrics.reset()
+        self.common(fn, (x,))
+        check_metrics_vec_kernel_count(1)
+
     def test_no_redundant_to_dtypes_between_fused_scheduler_node(self):
         # https://github.com/pytorch/pytorch/issues/115260
         p0 = torch.tensor([1.0879], dtype=torch.float16)
