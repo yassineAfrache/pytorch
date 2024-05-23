@@ -265,7 +265,13 @@ from setuptools.dist import Distribution
 from tools.build_pytorch_libs import build_caffe2
 from tools.generate_torch_version import get_torch_version
 from tools.setup_helpers.cmake import CMake
-from tools.setup_helpers.env import build_type, IS_DARWIN, IS_LINUX, IS_WINDOWS
+from tools.setup_helpers.env import (
+    build_type,
+    IS_DARWIN,
+    IS_LINUX,
+    IS_WINDOWS,
+    LIBTORCH_PKG_NAME,
+)
 from tools.setup_helpers.generate_linker_script import gen_linker_script
 
 ################################################################################
@@ -1146,7 +1152,7 @@ def main():
             )
 
             final_package_name = PACKAGE_NAME
-            PACKAGE_NAME = "libtorch"
+            PACKAGE_NAME = LIBTORCH_PKG_NAME
             BUILD_LIBTORCH_WHL = True
             BUILD_PYTHON_ONLY = False
             _main()
@@ -1167,7 +1173,7 @@ def _main():
         os.environ["BUILD_FUNCTORCH"] = "OFF"
     if BUILD_PYTHON_ONLY:
         os.environ["BUILD_LIBTORCHLESS"] = "ON"
-        os.environ["LIBTORCH_LIB_PATH"] = f"{_get_package_path('libtorchsplit')}/lib"
+        os.environ["LIBTORCH_LIB_PATH"] = f"{_get_package_path(LIBTORCH_PKG_NAME)}/lib"
 
     # the list of runtime dependencies required by this built package
     install_requires = [
@@ -1488,7 +1494,7 @@ def _main():
         for package in packages:
             parts = package.split(".")
             if parts[0] == "torch":
-                modified_packages.append("libtorch" + package[len("torch") :])
+                modified_packages.append(LIBTORCH_PKG_NAME + package[len("torch") :])
         packages = modified_packages
         package_dir = {"libtorch": "torch"}
         torch_package_dir_name = "libtorch"
