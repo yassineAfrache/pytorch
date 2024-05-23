@@ -58,7 +58,7 @@ struct IsVecType<at::vec::Vectorized<T>>: std::true_type {};
 #endif
 
 template <typename T>
-Welford<T> welford_combine(const Welford<T> &a, const Welford<T> &b) {
+Welford<T> welford_combine(const Welford<T>& a, const Welford<T>& b) {
   if constexpr (!IsVecType<T>::value) {
     if (a.weight == 0) {
       return b;
@@ -83,7 +83,7 @@ Welford<T> welford_combine(const Welford<T> &a, const Welford<T> &b) {
 }
 
 template <typename T>
-Welford<T> welford_combine(const Welford<T> &acc, T data) {
+Welford<T> welford_combine(const Welford<T>& acc, const T& data) {
   // Add a single data point
   auto delta = data - acc.mean;
   auto new_weight = acc.weight + T(1);
@@ -96,6 +96,62 @@ Welford<T> welford_combine(const Welford<T> &acc, T data) {
   };
   return result;
 }
+
+#if INDUCTOR_USE_VECTOR_TYPES()
+template <typename T>
+Welford<T> welford_combine(const Welford<T>& a, const Welford<T>& b, const int64_t tail_size) {
+  auto delta = b.mean - a.mean;
+  auto new_weight = a.weight + b.weight;
+  auto wb_over_w = b.weight / new_weight;
+  // Guard against division by zero
+  wb_over_w = T::blendv(wb_over_w, T(0), new_weight == T(0));
+  auto new_mean = a.mean + delta * wb_over_w;
+  auto new_m2 = a.m2 + b.m2 + delta * delta * a.weight * wb_over_w;
+  return Welford<T>{
+    T::set(a.mean, new_mean, tail_size),
+    T::set(a.m2, new_m2, tail_size),
+    T::set(a.weight, new_weight, tail_size)
+  };
+}
+
+template <typename T>
+Welford<T> welford_combine(const Welford<T>& acc, const T& data, const int64_t tail_size) {
+  // Add a single data point
+  auto delta = data - acc.mean;
+  auto new_weight = acc.weight + T(1);
+  auto new_mean = acc.mean + delta / new_weight;
+  auto new_delta = data - new_mean;
+  auto new_m2 = acc.m2 + delta * new_delta;
+  return Welford<T>{
+    T::set(acc.mean, new_mean, tail_size),
+    T::set(acc.m2, new_m2, tail_size),
+    T::set(acc.weight, new_weight, tail_size)
+  };
+}
+
+template <typename T>
+T reduce(const T& a, const T& b, const std::string& reduction_type) {
+  if (reduction_type == "max") {
+    return at::vec::maximum(a, b);
+  } else if (reduction_type == "min") {
+    return at::vec::minimum(a, b);
+  } else if (reduction_type == "sum") {
+    return a + b;
+  } else if (reduction_type == "prod") {
+    return a * b;
+  } else if (reduction_type == "xor_sum") {
+    return a ^ b;
+  } else{
+    throw std::runtime_error("Unexpected reduction type!");
+  }
+}
+
+template <typename T>
+T reduce(const T& a, const T& b, const std::string& reduction_type, const int64_t tail_size) {
+  auto out = reduce(a, b, reduction_type);
+  return T::set(a, out, tail_size);
+}
+#endif
 
 // Refer to https://github.com/pytorch/pytorch/blob/b5b36cf0c4e1958f1ff25120f5d4beeef3288187/
 // aten/src/ATen/native/SharedReduceOps.h#L419-L445
