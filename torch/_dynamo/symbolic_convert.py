@@ -651,6 +651,7 @@ class InstructionTranslatorBase(
     inconsistent_side_effects: bool
     current_speculation: Optional[SpeculationEntry]
     dispatch_table: List[Any]
+    exn_vt_stack: List[VariableTracker]
     exec_recorder: Optional[ExecutionRecorder]
     strict_checks_fn: Optional[Callable[[VariableTracker], bool]]
 
@@ -800,6 +801,15 @@ class InstructionTranslatorBase(
         try:
             self.dispatch_table[inst.opcode](self, inst)
             return not self.output.should_exit
+        except exc.ObservedException:
+            if inst.exn_tab_entry is not None:
+                self.jump(inst.exn_tab_entry)
+                self.push(self.exn_vt_stack[-1])
+                return True
+            # else:
+            #     breakpoint()
+            #     # self.parent.push(self.pop())
+            raise
         except ReturnValueOp:
             return False
         except Unsupported:
@@ -989,8 +999,8 @@ class InstructionTranslatorBase(
                 assert name in self.f_builtins
                 self.exec_recorder.builtins[name] = self.f_builtins[name]
 
-        if inst.argval == "AssertionError":
-            unimplemented("assert with non-string message")
+        # if inst.argval == "AssertionError":
+        #     unimplemented("assert with non-string message")
 
         if name in self.symbolic_globals:
             variable = self.output.side_effects[self.symbolic_globals[name]]
@@ -1229,6 +1239,19 @@ class InstructionTranslatorBase(
                 self.push(ConstantVariable.create(None))
             self.jump(inst)
 
+    def JUMP_IF_NOT_EXC_MATCH(self, inst):
+        # TODO(anijain2305) - Share code with CHECK_EXC_MATCH
+        assert len(self.stack) >= 2
+        expected_class = self.pop()
+        exn = self.pop()
+
+        if not (
+            isinstance(expected_class, BuiltinVariable)
+            and isinstance(exn, variables.ExceptionVariable)
+            and issubclass(exn.exc_type, expected_class.fn)
+        ):
+            self.jump(inst.target)
+
     def RAISE_VARARGS(self, inst):
         if inst.arg == 0:
             unimplemented("re-raise")
@@ -1238,9 +1261,93 @@ class InstructionTranslatorBase(
                 isinstance(val, BuiltinVariable) and val.fn is StopIteration
             ) or isinstance(val, variables.StopIterationVariable):
                 raise exc.UserStopIteration
+            if isinstance(val, variables.ExceptionVariable):
+                self.get_exception_handler(val)
+                return
             unimplemented(f"raise {exc}")
         else:
             unimplemented("raise ... from ...")
+
+    def get_exception_handler(self, exception_var):
+        # Save the exception in a global data structure
+        self.exn_vt_stack.append(exception_var)
+
+        if sys.version_info >= (3, 11):
+            exn_tab_entry = self.current_instruction.exn_tab_entry
+            if exn_tab_entry:
+                # Implementation is based on https://github.com/python/cpython/blob/3.11/Objects/exception_handling_notes.txt
+
+                # 1) pop values from the stack until it matches the stack depth
+                # for the handler
+                while len(self.stack) > exn_tab_entry.depth:
+                    self.pop()
+
+                # 2) if 'lasti' is true, then push the offset that the exception was raised at
+                if exn_tab_entry.lasti:
+                    # TODO(anijain2305) - This unimplemented should not be
+                    # required. Remove it once tested.
+                    unimplemented("lasti is True in exception handling")
+                    self.push(self.current_instruction.offset)
+
+                # 3) push the exception to the stack
+                self.push(exception_var)
+
+                # 4) push the exception to the stack
+                self.jump(exn_tab_entry)
+            else:
+                # No handler found. Bubble the exception to the parent
+                # instruction translater. We use special exception for this.
+                self.stack.clear()
+                raise exc.ObservedException
+        else:
+            if len(self.block_stack):
+                inst_to_jump = self.block_stack.pop()
+                # Push old exception
+                self.push(variables.ConstantVariable(None))
+                self.push(variables.ConstantVariable(None))
+                self.push(variables.ConstantVariable(None))
+
+                # Push new exception
+                self.push(exception_var)
+                self.push(exception_var)
+                self.push(exception_var)
+
+                # Jump to target
+                self.jump(inst_to_jump)
+            else:
+                # No handler found. Bubble the exception to the parent
+                # instruction translater. We use special exception for this.
+                self.stack.clear()
+                raise exc.ObservedException
+
+    def PUSH_EXC_INFO(self, inst):
+        val = self.pop()
+
+        if self.exn_vt_stack:
+            self.push(self.exn_vt_stack.pop())
+
+        self.push(val)
+
+    def POP_EXCEPT(self, inst):
+        if sys.version_info >= (3, 11):
+            val = self.pop()
+            assert isinstance(val, variables.ExceptionVariable)
+        else:
+            self.popn(3)
+
+    def CHECK_EXC_MATCH(self, inst):
+        assert len(self.stack) >= 2
+        expected_class = self.pop()
+        exn = self.stack[-1]
+
+        if (
+            isinstance(expected_class, BuiltinVariable)
+            and isinstance(exn, variables.ExceptionVariable)
+            and issubclass(exn.exc_type, expected_class.fn)
+        ):
+            self.push(ConstantVariable(True))
+        else:
+            self.push(ConstantVariable(False))
 
     def COMPARE_OP(self, inst):
         self.push(compare_op_handlers[inst.argval](self, self.popn(2), {}))
@@ -2062,6 +2169,7 @@ class InstructionTranslatorBase(
         self.kw_names = None
         self.accept_prefix_inst = True
         self.prefix_insts = []
+        self.exn_vt_stack = []
 
         # Properties of the input/output code
         self.instructions: List[Instruction] = instructions
@@ -2571,6 +2679,11 @@ class InliningInstructionTranslator(InstructionTranslatorBase):
         try:
             with strict_ctx:
                 tracer.run()
+        except exc.ObservedException as e:
+            msg = f"Observed exception DURING INLING {code} : {e}"
+            parent.exn_vt_stack.extend(tracer.exn_vt_stack)
+            log.debug(msg)
+            raise
         except exc.SkipFrame as e:
             msg = f"SKIPPED INLINING {code}: {e}"
             log.debug(msg)
