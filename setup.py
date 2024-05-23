@@ -348,7 +348,7 @@ cmake_python_include_dir = sysconfig.get_path("include")
 # Version, create_version_file, and package_name
 ################################################################################
 
-DEFAULT_PACKAGE_NAME = "libtorch" if BUILD_LIBTORCH_WHL else "torch"
+DEFAULT_PACKAGE_NAME = LIBTORCH_PKG_NAME if BUILD_LIBTORCH_WHL else "torch"
 
 PACKAGE_NAME = os.getenv("TORCH_PACKAGE_NAME", DEFAULT_PACKAGE_NAME)
 package_type = os.getenv("PACKAGE_TYPE", "wheel")
@@ -1187,7 +1187,7 @@ def _main():
     ]
 
     if BUILD_PYTHON_ONLY:
-        install_requires.append("libtorch")
+        install_requires.append(LIBTORCH_PKG_NAME)
 
     use_prioritized_text = str(os.getenv("USE_PRIORITIZED_TEXT_FOR_LD", ""))
     if (
@@ -1496,9 +1496,9 @@ def _main():
             if parts[0] == "torch":
                 modified_packages.append(LIBTORCH_PKG_NAME + package[len("torch") :])
         packages = modified_packages
-        package_dir = {"libtorch": "torch"}
-        torch_package_dir_name = "libtorch"
-        package_data = {"libtorch": torch_package_data}
+        package_dir = {LIBTORCH_PKG_NAME: "torch"}
+        torch_package_dir_name = LIBTORCH_PKG_NAME
+        package_data = {LIBTORCH_PKG_NAME: torch_package_data}
         extensions = []
     else:
         torch_package_dir_name = "torch"
