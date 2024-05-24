@@ -153,7 +153,7 @@ class TestAutograd(TestCase):
 
     def test_grad_mode_class_decoration(self):
         # Decorating class is deprecated and should not be used
-        with self.assertWarnsRegex(UserWarning, "Decorating classes is deprecated"):
+        with self.assertWarnsRegex(FutureWarning, "Decorating classes is deprecated"):
 
             @torch.no_grad()
             class Foo:

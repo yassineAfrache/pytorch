@@ -723,7 +723,7 @@ class TestPythonPytree(TestCase):
                 self.y = y
 
         with self.assertWarnsRegex(
-            UserWarning, "torch.utils._pytree._register_pytree_node"
+            FutureWarning, "torch.utils._pytree._register_pytree_node"
         ):
             py_pytree._register_pytree_node(
                 DummyType,
@@ -731,7 +731,7 @@ class TestPythonPytree(TestCase):
                 lambda xs, _: DummyType(*xs),
             )
 
-        with self.assertWarnsRegex(UserWarning, "already registered"):
+        with self.assertWarnsRegex(FutureWarning, "already registered"):
             py_pytree._register_pytree_node(
                 DummyType,
                 lambda dummy: ([dummy.x, dummy.y], None),
