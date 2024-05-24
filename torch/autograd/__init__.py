@@ -9,8 +9,6 @@ half, float, double and bfloat16) and complex :class:`Tensor` types (cfloat, cdo
 import warnings
 from typing import Any, Callable, cast, List, Optional, Sequence, Tuple, Union
 
-from typing_extensions import deprecated
-
 import torch
 
 from torch.types import _size, _TensorOrTensors, _TensorOrTensorsOrGradEdge
@@ -485,10 +483,7 @@ def variable(*args, **kwargs):
 # f"{fn.__module__}.{fn.__name__}(...). This yields torch.autograd.variable.Variable(...) in the
 # output of an FX graph.  Unfortunately the module name torch.autograd.variable is shadowed by the
 # deprecated function - variable(...).
-variable.Variable = deprecated(  # type: ignore[attr-defined]
-    "`torch.autograd.variable` is deprecated",
-    category=FutureWarning,
-)(Variable)
+variable.Variable = Variable  # type: ignore[attr-defined]
 
 if not torch._C._autograd_init():
     raise RuntimeError("autograd initialization failed")
