@@ -11,7 +11,7 @@ from types import FunctionType, ModuleType
 from typing import Any, Dict, Optional, Set, Union
 from unittest import mock
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 # Types saved/loaded in configs
 CONFIG_TYPES = (int, float, bool, type(None), str, list, set, tuple, dict)

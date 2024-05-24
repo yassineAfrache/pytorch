@@ -3,7 +3,7 @@ import warnings
 import numbers
 import weakref
 from typing import List, Tuple, Optional, overload
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 from torch import Tensor

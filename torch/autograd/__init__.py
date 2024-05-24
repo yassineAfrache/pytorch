@@ -9,7 +9,7 @@ half, float, double and bfloat16) and complex :class:`Tensor` types (cfloat, cdo
 import warnings
 from typing import Any, Callable, cast, List, Optional, Sequence, Tuple, Union
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 

@@ -10,7 +10,7 @@ from typing import (
     cast,
     TYPE_CHECKING,
 )
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 import copy
 import warnings
 from functools import reduce

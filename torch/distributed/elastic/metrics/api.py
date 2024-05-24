@@ -11,7 +11,7 @@ import time
 from collections import namedtuple
 from functools import wraps
 from typing import Dict, Optional
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 __all__ = ['MetricsConfig', 'MetricHandler', 'ConsoleMetricHandler', 'NullMetricHandler', 'MetricStream',
            'configure', 'getStream', 'prof', 'profile', 'put_metric', 'publish_metric', 'get_elapsed_time_ms',

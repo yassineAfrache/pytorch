@@ -1,6 +1,6 @@
 import functools
 from typing import Union, Iterable, List, Dict, Tuple, Optional, cast
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 from torch import Tensor

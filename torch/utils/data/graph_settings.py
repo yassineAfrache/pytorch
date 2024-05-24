@@ -2,7 +2,7 @@ import inspect
 import warnings
 
 from typing import Any, List, Optional, Set
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 

@@ -2,7 +2,7 @@ import contextlib
 from collections import defaultdict
 from typing import Any, Dict, Iterator, Optional, Set, Tuple, Union
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 from torch import Tensor

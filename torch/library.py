@@ -1,6 +1,6 @@
 from ._ops import OpOverload
 from typing import Any, Optional, Set, List, Union, Callable, Tuple, Dict, Sequence
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 import traceback
 import torch
 import weakref

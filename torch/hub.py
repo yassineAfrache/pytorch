@@ -13,7 +13,7 @@ import warnings
 import zipfile
 from pathlib import Path
 from typing import Dict, Optional, Any
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen, Request
 from urllib.parse import urlparse  # noqa: F401

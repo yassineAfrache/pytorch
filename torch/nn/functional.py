@@ -3,7 +3,7 @@ from typing import Callable, List, Optional, Tuple, Union
 import math
 import warnings
 import importlib
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 try:
     import numpy as np

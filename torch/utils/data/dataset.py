@@ -15,7 +15,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 # No 'default_generator' in torch/__init__.pyi
 from torch import default_generator, randperm

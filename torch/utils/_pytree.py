@@ -49,7 +49,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 
 __all__ = [

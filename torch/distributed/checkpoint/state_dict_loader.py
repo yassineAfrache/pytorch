@@ -2,7 +2,7 @@ import os
 import warnings
 from typing import Any, cast, Dict, Optional, Set, Union
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 import torch.distributed as dist

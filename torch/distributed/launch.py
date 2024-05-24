@@ -158,8 +158,7 @@ will not pass ``--local-rank`` when you specify this flag.
 
 
 """
-
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 from torch.distributed.run import get_args_parser, run
 

@@ -2,7 +2,7 @@ r"""Weight Normalization from https://arxiv.org/abs/1602.07868."""
 from torch.nn.parameter import Parameter, UninitializedParameter
 from torch import _weight_norm, norm_except_dim
 from typing import Any, TypeVar
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 from ..modules import Module
 
 __all__ = ['WeightNorm', 'weight_norm', 'remove_weight_norm']

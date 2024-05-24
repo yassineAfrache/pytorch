@@ -22,7 +22,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import deprecated, TypeAlias  # Python 3.13+
+from typing_extensions import deprecated, TypeAlias
 
 
 if TYPE_CHECKING:

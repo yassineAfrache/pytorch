@@ -5,7 +5,7 @@ from .. import _reduction as _Reduction
 
 from torch import Tensor
 from typing import Callable, Optional
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 __all__ = ['L1Loss', 'NLLLoss', 'NLLLoss2d', 'PoissonNLLLoss', 'GaussianNLLLoss', 'KLDivLoss',
            'MSELoss', 'BCELoss', 'BCEWithLogitsLoss', 'HingeEmbeddingLoss', 'MultiLabelMarginLoss',

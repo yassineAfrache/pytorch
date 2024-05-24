@@ -5,7 +5,7 @@ import warnings
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 import torch._C as _C

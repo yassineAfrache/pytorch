@@ -1,6 +1,6 @@
 import torch
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union, overload
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 from ._functions import Scatter, Gather
 
 __all__ = ['scatter', 'scatter_kwargs', 'gather']

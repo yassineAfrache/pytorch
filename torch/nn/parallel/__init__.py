@@ -1,4 +1,4 @@
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 from .parallel_apply import parallel_apply
 from .replicate import replicate

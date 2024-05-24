@@ -14,7 +14,7 @@ import warnings
 from collections import namedtuple
 from datetime import timedelta
 from typing import Any, Callable, Dict, Optional, Tuple, Union, List, TYPE_CHECKING
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 from torch._C._distributed_c10d import (

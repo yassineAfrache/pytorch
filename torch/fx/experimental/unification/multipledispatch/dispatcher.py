@@ -1,6 +1,6 @@
 from warnings import warn
 import inspect
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 from .conflict import ordering, ambiguities, super_signature, AmbiguityWarning
 from .utils import expand_tuples
 from .variadic import Variadic, isvariadic

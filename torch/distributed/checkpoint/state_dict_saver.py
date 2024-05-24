@@ -4,7 +4,7 @@ import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import cast, Optional, Union
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 import torch.distributed as dist

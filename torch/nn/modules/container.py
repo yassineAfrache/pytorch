@@ -9,7 +9,7 @@ from torch._jit_internal import _copy_to_script_wrapper
 
 from typing import Any, Dict, Iterable, Iterator, Mapping, Optional, overload, Tuple, TypeVar, Union
 from typing_extensions import Self
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 __all__ = ['Container', 'Sequential', 'ModuleList', 'ModuleDict', 'ParameterList', 'ParameterDict']
 

@@ -3,7 +3,7 @@
 import functools
 from typing import List
 
-from typing_extensions import deprecated  # Python 3.13+
+from typing_extensions import deprecated
 
 import torch
 import torch.utils._pytree as pytree
