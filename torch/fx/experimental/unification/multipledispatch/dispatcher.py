@@ -28,19 +28,21 @@ def ambiguity_warn(dispatcher, ambiguities):
     warn(warning_text(dispatcher.name, ambiguities), AmbiguityWarning)
 
 
-@deprecated('`halt_ordering` is deprecated, you can safely remove this call.')
+@deprecated(
+    "`halt_ordering` is deprecated, you can safely remove this call.",
+    category=FutureWarning,
+)
 def halt_ordering():
-    """Deprecated interface to temporarily disable ordering.
-    """
+    """Deprecated interface to temporarily disable ordering."""
 
 
 @deprecated(
-    '`restart_ordering` is deprecated, if you would like to eagerly order the dispatchers, '
-    'you should call the `reorder()` method on each dispatcher.',
+    "`restart_ordering` is deprecated, if you would like to eagerly order the dispatchers, "
+    "you should call the `reorder()` method on each dispatcher.",
+    category=FutureWarning,
 )
 def restart_ordering(on_ambiguity=ambiguity_warn):
-    """Deprecated interface to temporarily resume ordering.
-    """
+    """Deprecated interface to temporarily resume ordering."""
 
 
 def variadic_signature_matches_iter(types, full_signature):
@@ -312,7 +314,7 @@ class Dispatcher:
                     result = self.funcs[signature]
                     yield result
 
-    @deprecated("`resolve()` is deprecated, use `dispatch(*types)`")
+    @deprecated("`resolve()` is deprecated, use `dispatch(*types)`", category=FutureWarning)
     def resolve(self, types):
         """ Determine appropriate implementation for this type signature
         .. deprecated:: 0.4.4

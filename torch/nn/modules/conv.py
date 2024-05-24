@@ -40,9 +40,6 @@ convolution_notes = \
         :math:`(C_\text{in}=C_\text{in}, C_\text{out}=C_\text{in} \times \text{K}, ..., \text{groups}=C_\text{in})`."""}  # noqa: B950
 
 
-
-
-
 class _ConvNd(Module):
 
     __constants__ = ['stride', 'padding', 'dilation', 'groups',
@@ -610,7 +607,6 @@ class Conv3d(_ConvNd):
         return self._conv_forward(input, self.weight, self.bias)
 
 
-
 class _ConvTransposeNd(_ConvNd):
     def __init__(self, in_channels, out_channels, kernel_size, stride,
                  padding, dilation, transposed, output_padding,
@@ -1121,9 +1117,11 @@ class ConvTranspose3d(_ConvTransposeNd):
 # `_ConvTransposeNd` is really not a mixin anymore (but multiple inheritance as
 # above would still work).
 class _ConvTransposeMixin(_ConvTransposeNd):
+
     @deprecated(
         "`_ConvTransposeMixin` is a deprecated internal class. "
         "Please consider using public APIs.",
+        category=FutureWarning,
     )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -15,7 +15,8 @@ except ModuleNotFoundError:
 
 
 @deprecated(
-    "`is_compiling` is deprecated. Use `torch.compiler.is_compiling()` instead."
+    "`is_compiling` is deprecated. Use `torch.compiler.is_compiling()` instead.",
+    category=FutureWarning,
 )
 def is_compiling() -> bool:
     """

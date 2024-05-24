@@ -173,7 +173,10 @@ class Distribution:
         """
         raise NotImplementedError
 
-    @deprecated("`sample_n(n)` will be deprecated. Use `sample((n,))` instead.")
+    @deprecated(
+        "`sample_n(n)` will be deprecated. Use `sample((n,))` instead.",
+        category=FutureWarning,
+    )
     def sample_n(self, n: int) -> torch.Tensor:
         """
         Generates n samples or n batches of samples if the distribution

@@ -29,6 +29,7 @@ __all__ = ["save_state_dict", "save", "async_save"]
 @deprecated(
     "`save_state_dict` is deprecated and will be removed in future versions."
     "Please use `save` instead.",
+    category=FutureWarning,
 )
 def save_state_dict(
     state_dict: STATE_DICT_TYPE,

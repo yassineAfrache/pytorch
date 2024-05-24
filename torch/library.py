@@ -466,10 +466,9 @@ def _(lib: Library, name, dispatch_key=""):
 
 
 @deprecated(
-    "torch.library.impl_abstract was renamed to "
-    "torch.library.register_fake. Please use that instead; "
-    "we will remove torch.library.impl_abstract in a future "
-    "version of PyTorch.",
+    "`torch.library.impl_abstract` was renamed to `torch.library.register_fake`. Please use that "
+    "instead; we will remove `torch.library.impl_abstract` in a future version of PyTorch.",
+    category=FutureWarning,
 )
 def impl_abstract(qualname, func=None, *, lib=None, _stacklevel=1):
     r"""This API was renamed to :func:`torch.library.register_fake` in PyTorch 2.4.

@@ -417,7 +417,10 @@ class FormattedTimesMixin:
         return 0.0 if self.count == 0 else 1.0 * self.device_time_total / self.count  # type: ignore[attr-defined]
 
     @property
-    @deprecated("`cuda_time` is deprecated, please use `device_time` instead.")
+    @deprecated(
+        "`cuda_time` is deprecated, please use `device_time` instead.",
+        category=FutureWarning,
+    )
     def cuda_time(self):  # To be deprecated
         return self.device_time
 
@@ -542,7 +545,8 @@ class FunctionEvent(FormattedTimesMixin):
 
     @property
     @deprecated(
-        "`self_cuda_memory_usage` is deprecated. Use `self_device_memory_usage` instead."
+        "`self_cuda_memory_usage` is deprecated. Use `self_device_memory_usage` instead.",
+        category=FutureWarning,
     )
     def self_cuda_memory_usage(self):  # To be deprecated
         return self.self_device_memory_usage
@@ -580,7 +584,10 @@ class FunctionEvent(FormattedTimesMixin):
             return self.time_range.elapsed_us()
 
     @property
-    @deprecated("`cuda_time_total` is deprecated. Use `device_time_total` instead.")
+    @deprecated(
+        "`cuda_time_total` is deprecated. Use `device_time_total` instead.",
+        category=FutureWarning,
+    )
     def cuda_time_total(self):  # To be deprecated
         return self.device_time_total
 
@@ -598,7 +605,8 @@ class FunctionEvent(FormattedTimesMixin):
 
     @property
     @deprecated(
-        "`self_cuda_time_total` is deprecated. Use `self_device_time_total` instead."
+        "`self_cuda_time_total` is deprecated. Use `self_device_time_total` instead.",
+        category=FutureWarning,
     )
     def self_cuda_time_total(self):  # To be deprecated
         return self.self_device_time_total

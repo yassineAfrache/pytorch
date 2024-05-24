@@ -185,8 +185,9 @@ class ConfigModule(ModuleType):
         return self._hash_digest
 
     @deprecated(
-        "config.to_dict() has been deprecated. It may no longer change the underlying config."
-        " use config.shallow_copy_dict() or config.get_config_copy() instead",
+        "`config.to_dict()` has been deprecated. It may no longer change the underlying config."
+        " use `config.shallow_copy_dict()` or `config.get_config_copy()` instead",
+        category=FutureWarning,
     )
     def to_dict(self) -> Dict[str, Any]:
         return self.shallow_copy_dict()

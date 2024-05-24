@@ -13,6 +13,7 @@ class Type(Function):
     @deprecated(
         "`torch.autograd._functions.Type` is deprecated as of PyTorch 2.1, "
         "please use `torch.tensor.to(dtype=dtype)` instead.",
+        category=FutureWarning,
     )
     def forward(ctx, i, dest_type):
         ctx.input_type = type(i)

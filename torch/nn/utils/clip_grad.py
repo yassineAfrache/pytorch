@@ -102,6 +102,7 @@ def clip_grad_norm_(
 @deprecated(
     "`torch.nn.utils.clip_grad_norm` is now deprecated "
     "in favor of `torch.nn.utils.clip_grad_norm_`.",
+    category=FutureWarning,
 )
 def clip_grad_norm(
         parameters: _tensor_or_tensors, max_norm: float, norm_type: float = 2.,

@@ -215,7 +215,7 @@ class profile:
             warn(
                 "The attribute `use_cuda` will be deprecated soon, "
                 "please use ``use_device = 'cuda'`` instead.",
-                DeprecationWarning,
+                FutureWarning,
             )
             self.use_device: Optional[str] = "cuda"
         else:

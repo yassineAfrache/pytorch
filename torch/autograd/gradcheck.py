@@ -314,6 +314,7 @@ def _get_numerical_jacobian(
     "in a future version of PyTorch. If you have a specific use for "
     "this or feature request for this to be a stable API, please file "
     "us an issue at https://github.com/pytorch/pytorch/issues/new",
+    category=FutureWarning,
 )
 def get_numerical_jacobian(fn, inputs, target=None, eps=1e-3, grad_out=1.0):
     """Compute the numerical Jacobian for a given fn and its inputs.
@@ -826,6 +827,7 @@ def _get_analytical_vJu_backward_mode(
     "in a future version of PyTorch. If you have a specific use for "
     "this or feature request for this to be a stable API, please file "
     "us an issue at https://github.com/pytorch/pytorch/issues/new",
+    category=FutureWarning,
 )
 def get_analytical_jacobian(inputs, output, nondet_tol=0.0, grad_out=1.0):
     # Replicates the behavior of the old get_analytical_jacobian before the refactor

@@ -171,6 +171,7 @@ def register_pytree_node(
 @deprecated(
     "`torch.utils._cxx_pytree._register_pytree_node` is deprecated. "
     "Please use `torch.utils._cxx_pytree.register_pytree_node` instead.",
+    category=FutureWarning,
 )
 def _register_pytree_node(
     cls: Type[Any],

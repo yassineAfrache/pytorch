@@ -363,12 +363,12 @@ class _reduce_op:
             setattr(self, k, v)
         self.__members__ = ReduceOp.RedOpType.__members__
 
+    @deprecated(
+        "`torch.distributed.reduce_op` is deprecated, "
+        "please use `torch.distributed.ReduceOp` instead",
+        category=FutureWarning,
+    )
     def __getattribute__(self, key):
-        warnings.warn(
-            "`torch.distributed.reduce_op` is deprecated, "
-            "please use `torch.distributed.ReduceOp` instead",
-            DeprecationWarning,
-        )
         return object.__getattribute__(self, key)
 
 
@@ -676,7 +676,7 @@ def _get_pg_default_device(group: Optional[ProcessGroup] = None) -> torch.device
             f"You are using a Backend {type(group)} as a ProcessGroup. "
             "This usage is deprecated since PyTorch 2.0. Please use a public API "
             "of PyTorch Distributed instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         # Most users create Gloo with private API for object collectives
         _world.pg_default_device[group] = torch.device("cpu")
@@ -830,10 +830,12 @@ def get_global_rank(group: ProcessGroup, group_rank: int) -> int:
             return rank
     raise ValueError(f"Group rank {group_rank} is not part of group {group}")
 
+
 # TODO: remove this once the ecosystem moves away from it.
 @deprecated(
     "`torch.distributed.distributed_c10d._get_global_rank` is deprecated, "
-    "please use `torch.distributed.distributed_c10d.get_global_rank` instead"
+    "please use `torch.distributed.distributed_c10d.get_global_rank` instead",
+    category=FutureWarning,
 )
 def _get_global_rank(group, rank) -> int:
     """Use get_global_rank as this method is deprecated."""
@@ -3201,6 +3203,7 @@ def all_gather_into_tensor(output_tensor, input_tensor, group=None, async_op=Fal
 @deprecated(
     "`torch.distributed._all_gather_base` is a private function and will be deprecated. "
     "Please use `torch.distributed.all_gather_into_tensor` instead.",
+    category=FutureWarning,
 )
 def _all_gather_base(output_tensor, input_tensor, group=None, async_op=False):
     """
@@ -3611,6 +3614,7 @@ def reduce_scatter_tensor(output, input, op=ReduceOp.SUM, group=None, async_op=F
 @deprecated(
     "`torch.distributed._reduce_scatter_base` is a private function and will be deprecated. "
     "Please use `torch.distributed.reduce_scatter_tensor` instead.",
+    category=FutureWarning,
 )
 def _reduce_scatter_base(output, input, op=ReduceOp.SUM, group=None, async_op=False):
     """

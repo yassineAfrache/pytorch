@@ -107,7 +107,10 @@ class QConfig(namedtuple('QConfig', ['activation', 'weight'])):
         return super().__new__(cls, activation, weight)
 
 
-@deprecated("QConfigDynamic is going to be deprecated in PyTorch 1.12, please use QConfig instead")
+@deprecated(
+    "`QConfigDynamic` is going to be deprecated in PyTorch 1.12, please use `QConfig` instead",
+    category=FutureWarning,
+)
 class QConfigDynamic(namedtuple('QConfigDynamic', ['activation', 'weight'])):
     """
     Describes how to dynamically quantize a layer or a part of the network by providing
@@ -426,6 +429,7 @@ _default_quint8_placeholder_qconfig = QConfig(
 @deprecated(
     "`torch.ao.quantization.get_default_qconfig_dict` is deprecated and will be removed in "
     "a future version. Please use `torch.ao.quantization.get_default_qconfig_mapping` instead.",
+    category=FutureWarning,
 )
 def get_default_qconfig_dict(backend='x86', version=0):
     return torch.ao.quantization.get_default_qconfig_mapping(backend, version).to_dict()
@@ -433,6 +437,7 @@ def get_default_qconfig_dict(backend='x86', version=0):
 @deprecated(
     "`torch.ao.quantization.get_default_qat_qconfig_dict` is deprecated and will be removed in "
     "a future version. Please use `torch.ao.quantization.get_default_qat_qconfig_mapping` instead.",
+    category=FutureWarning,
 )
 def get_default_qat_qconfig_dict(backend='x86', version=1):
     return torch.ao.quantization.get_default_qat_qconfig_mapping(backend, version).to_dict()

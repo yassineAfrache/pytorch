@@ -772,7 +772,7 @@ class DistributedDataParallel(Module, Joinable):
             warnings.warn(
                 "The `check_reduction` argument in `DistributedDataParallel` "
                 "module is deprecated. Please avoid using it.",
-                DeprecationWarning,
+                FutureWarning,
             )
 
         # Check that a module does not have Uninitialized parameters

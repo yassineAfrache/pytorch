@@ -600,8 +600,8 @@ def _make_deprecate(meth):
 
     def deprecated_init(*args, **kwargs):
         warnings.warn(
-            f"nn.init.{old_name} is now deprecated in favor of nn.init.{new_name}.",
-            DeprecationWarning,
+            f"`nn.init.{old_name}` is now deprecated in favor of `nn.init.{new_name}`.",
+            FutureWarning,
             stacklevel=2,
         )
         return meth(*args, **kwargs)

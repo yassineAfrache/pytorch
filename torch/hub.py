@@ -685,6 +685,7 @@ def _is_legacy_zip_format(filename: str) -> bool:
     'Falling back to the old format < 1.6. This support will be '
     'deprecated in favor of default zipfile format introduced in 1.6. '
     'Please redo torch.save() to save it in the new zipfile format.',
+    category=FutureWarning,
 )
 def _legacy_zip_load(filename: str, model_dir: str, map_location: MAP_LOCATION, weights_only: bool) -> Dict[str, Any]:
     # Note: extractall() defaults to overwrite file if exists. No need to clean up beforehand.

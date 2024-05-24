@@ -219,6 +219,7 @@ class NLLLoss(_WeightedLoss):
     "`NLLLoss2d` has been deprecated. "
     "Please use `NLLLoss` instead as a drop-in replacement and see "
     "https://pytorch.org/docs/main/nn.html#torch.nn.NLLLoss for more details.",
+    category=FutureWarning,
 )
 class NLLLoss2d(NLLLoss):
     def __init__(self, weight: Optional[Tensor] = None, size_average=None, ignore_index: int = -100,

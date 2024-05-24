@@ -126,7 +126,8 @@ class AbstractImplCtx:
         self._op = _op
 
     @deprecated(
-        "`create_unbacked_symint` is deprecated, please use `new_dynamic_size` instead"
+        "`create_unbacked_symint` is deprecated, please use `new_dynamic_size` instead",
+        category=FutureWarning,
     )
     def create_unbacked_symint(self, *, min=2, max=None) -> torch.SymInt:
         return self.new_dynamic_size(min=min, max=max)

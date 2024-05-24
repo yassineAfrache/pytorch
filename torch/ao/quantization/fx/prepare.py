@@ -1753,7 +1753,7 @@ def prepare(
         warnings.warn(
             "Passing a QConfig dictionary to prepare is deprecated and will not be supported "
             "in a future version. Please pass in a QConfigMapping instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         qconfig_mapping = QConfigMapping.from_dict(qconfig_mapping)
 
@@ -1761,7 +1761,7 @@ def prepare(
         warnings.warn(
             "Passing a QConfig dictionary to prepare for equalization is deprecated and will not "
             "be supported in a future version. Please pass in a QConfigMapping instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         _equalization_config = QConfigMapping.from_dict(_equalization_config)
 
@@ -1769,7 +1769,7 @@ def prepare(
         warnings.warn(
             "Passing a prepare_custom_config_dict to prepare is deprecated and will not be supported "
             "in a future version. Please pass in a PrepareCustomConfig instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         prepare_custom_config = PrepareCustomConfig.from_dict(prepare_custom_config)
 
@@ -1777,7 +1777,7 @@ def prepare(
         warnings.warn(
             "Passing a backend_config_dict to prepare is deprecated and will not be supported "
             "in a future version. Please pass in a BackendConfig instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         backend_config = BackendConfig.from_dict(backend_config)
 

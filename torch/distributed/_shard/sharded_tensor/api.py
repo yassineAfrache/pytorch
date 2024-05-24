@@ -397,7 +397,7 @@ class ShardedTensor(ShardedTensorBase):
             return reduce(operator.mul, shard_md.shard_sizes)  # type: ignore[attr-defined]
 
         if enforce_dtype:
-            warnings.warn("`enforce_dtype` is deprecated. Please use `dtype` instead.", DeprecationWarning)
+            warnings.warn("`enforce_dtype` is deprecated. Please use `dtype` instead.", FutureWarning)
 
         rank = dist.get_rank(self._process_group)
         full_size = self.metadata().size
@@ -738,7 +738,7 @@ class ShardedTensor(ShardedTensorBase):
         return sharded_tensor
 
     @classmethod
-    @deprecated(DEPRECATE_MSG)
+    @deprecated(DEPRECATE_MSG, category=FutureWarning)
     def _init_from_local_tensor(
         cls,
         local_tensor: torch.Tensor,
@@ -980,7 +980,7 @@ class ShardedTensor(ShardedTensorBase):
         """
         return self._sharding_spec
 
-    @deprecated(DEPRECATE_MSG)
+    @deprecated(DEPRECATE_MSG, category=FutureWarning)
     def reshard(self, resharding_spec: shard_spec.ShardingSpec) -> ShardedTensor:
         """
         Reshard a sharded tensor given the ``resharding_spec``. For now, we only support
@@ -1095,7 +1095,7 @@ class ShardedTensor(ShardedTensorBase):
         return self.local_shards()[0].tensor
 
     @classmethod
-    @deprecated(DEPRECATE_MSG)
+    @deprecated(DEPRECATE_MSG, category=FutureWarning)
     def __torch_function__(cls, func, types, args=(), kwargs=None):
         def dispatch(st: ShardedTensor, func: Callable):
             # Dispatch to custom user provided op first if it exists.

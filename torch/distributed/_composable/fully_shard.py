@@ -44,6 +44,7 @@ from torch.distributed.fsdp.wrap import _Policy
     "You can continue to use the wrapper based FSDP. "
     "See usage in: https://github.com/pytorch/pytorch/blob/main/torch/distributed/fsdp/fully_sharded_data_parallel.py. "
     "`torch.distributed._composable.fully_shard` will be removed after PyTorch 2.5.",
+    category=FutureWarning,
 )
 def fully_shard(
     module: nn.Module,
@@ -62,9 +63,7 @@ def fully_shard(
         Optional[Iterable[torch.nn.Parameter]], Optional[Iterable[torch.nn.Module]]
     ] = None,
 ) -> nn.Module:
-    """
-    Applies ``FullyShardedDataParallel`` (FSDP) semantics to ``module``.
-    """
+    """Applies ``FullyShardedDataParallel`` (FSDP) semantics to ``module``."""
     torch._C._log_api_usage_once("torch.distributed.fully_shard")
     # Enforce the new auto wrap policy
     if policy is not None and not isinstance(policy, _Policy):

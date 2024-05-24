@@ -256,6 +256,7 @@ def _register_namedtuple(
 @deprecated(
     "`torch.utils._pytree._register_pytree_node` is deprecated. "
     "Please use `torch.utils._pytree.register_pytree_node` instead.",
+    category=FutureWarning,
 )
 def _register_pytree_node(
     cls: Type[Any],
@@ -298,7 +299,7 @@ def _register_pytree_node(
         warnings.warn(
             "`to_str_fn` and `maybe_from_str_fn` is deprecated. "
             "Please use `to_dumpable_context` and `from_dumpable_context` instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
 
     _private_register_pytree_node(
@@ -1453,13 +1454,19 @@ def treespec_pprint(treespec: TreeSpec) -> str:
 
 
 # TODO(angelayi): remove this function after OSS/internal stabilize
-@deprecated("`pytree_to_str` is deprecated. Please use `treespec_dumps` instead.")
+@deprecated(
+    "`pytree_to_str` is deprecated. Please use `treespec_dumps` instead.",
+    category=FutureWarning,
+)
 def pytree_to_str(treespec: TreeSpec) -> str:
     return treespec_dumps(treespec)
 
 
 # TODO(angelayi): remove this function after OSS/internal stabilize
-@deprecated("`str_to_pytree` is deprecated. Please use `treespec_loads` instead.")
+@deprecated(
+    "`str_to_pytree` is deprecated. Please use `treespec_loads` instead.",
+    category=FutureWarning,
+)
 def str_to_pytree(json: str) -> TreeSpec:
     return treespec_loads(json)
 

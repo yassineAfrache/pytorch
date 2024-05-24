@@ -350,7 +350,10 @@ class ConcatDataset(Dataset[T_co]):
         return self.datasets[dataset_idx][sample_idx]
 
     @property
-    @deprecated("`cummulative_sizes` attribute is renamed to `cumulative_sizes`")
+    @deprecated(
+        "`cummulative_sizes` attribute is renamed to `cumulative_sizes`",
+        category=FutureWarning,
+    )
     def cummulative_sizes(self):
         return self.cumulative_sizes
 

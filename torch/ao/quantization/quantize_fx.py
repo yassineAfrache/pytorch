@@ -121,7 +121,7 @@ forward graph of the parent module,
         warnings.warn(
             "Passing a prepare_custom_config_dict to prepare is deprecated and will not be supported "
             "in a future version. Please pass in a PrepareCustomConfig instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         prepare_custom_config = PrepareCustomConfig.from_dict(prepare_custom_config)
 
@@ -228,7 +228,7 @@ def fuse_fx(
         warnings.warn(
             "Passing a fuse_custom_config_dict to fuse is deprecated and will not be supported "
             "in a future version. Please pass in a FuseCustomConfig instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         fuse_custom_config = FuseCustomConfig.from_dict(fuse_custom_config)
 
@@ -519,7 +519,7 @@ def _convert_fx(
         warnings.warn(
             "Passing a convert_custom_config_dict to convert is deprecated and will not be supported "
             "in a future version. Please pass in a ConvertCustomConfig instead.",
-            DeprecationWarning,
+            FutureWarning,
         )
         convert_custom_config = ConvertCustomConfig.from_dict(convert_custom_config)
 

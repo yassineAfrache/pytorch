@@ -152,7 +152,8 @@ def _reparametrize_module(
 @deprecated(
     "`torch.nn.utils.stateless.functional_call` is deprecated as of PyTorch 2.0 "
     "and will be removed in a future version of PyTorch. "
-    "Please use `torch.func.functional_call` instead which is a drop-in replacement."
+    "Please use `torch.func.functional_call` instead which is a drop-in replacement.",
+    category=FutureWarning,
 )
 def functional_call(
     module: "torch.nn.Module",

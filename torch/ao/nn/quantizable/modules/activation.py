@@ -224,7 +224,6 @@ class MultiheadAttention(nn.MultiheadAttention):
 
         return fp
 
-
     @classmethod
     def from_observed(cls, other):
         # The whole flow is float -> observed -> quantized
@@ -338,7 +337,7 @@ class MultiheadAttention(nn.MultiheadAttention):
             if attn_mask.dtype == torch.uint8:
                 warnings.warn(
                     "Byte tensor for attn_mask in nn.MultiheadAttention is deprecated. Use bool tensor instead.",
-                    DeprecationWarning,
+                    FutureWarning,
                 )
                 attn_mask = attn_mask.to(torch.bool)
             assert attn_mask.is_floating_point() or attn_mask.dtype == torch.bool, \
@@ -359,7 +358,7 @@ class MultiheadAttention(nn.MultiheadAttention):
         if key_padding_mask is not None and key_padding_mask.dtype == torch.uint8:
             warnings.warn(
                 "Byte tensor for key_padding_mask in nn.MultiheadAttention is deprecated. Use bool tensor instead.",
-                DeprecationWarning,
+                FutureWarning,
             )
             key_padding_mask = key_padding_mask.to(torch.bool)
         if self.bias_k is not None and self.bias_v is not None:

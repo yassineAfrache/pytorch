@@ -22,6 +22,7 @@ __all__ = ["load_state_dict", "load"]
 @deprecated(
     "`load_state_dict` is deprecated and will be removed in future versions. "
     "Please use `load` instead.",
+    category=FutureWarning,
 )
 def load_state_dict(
     state_dict: Dict[str, Any],

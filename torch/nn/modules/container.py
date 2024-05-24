@@ -32,6 +32,7 @@ def _addindent(s_, numSpaces):
 @deprecated(
     "`nn.Container` is deprecated. "
     "All of it's functionality is now implemented in `nn.Module`. Subclass that instead.",
+    category=FutureWarning,
 )
 class Container(Module):
     def __init__(self, **kwargs: Any) -> None:

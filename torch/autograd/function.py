@@ -185,6 +185,7 @@ class FunctionCtx:
         "`mark_shared_storage` is deprecated. "
         "Tensors with shared storages are automatically tracked. "
         "Note that calls to `set_()` are not tracked",
+        category=FutureWarning,
     )
     def mark_shared_storage(self, *pairs):
         pass

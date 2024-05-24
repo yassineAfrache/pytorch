@@ -363,7 +363,7 @@ def to_sparse_semi_structured(
             "Setting transpose from `to_sparse_semi_structured` is deprecated "
             "and will be removed in a future release. "
             "`SparseSemiStructuredTensor` only support contiguous input tensors.",
-            DeprecationWarning,
+            FutureWarning,
             stacklevel=2,
         )
 

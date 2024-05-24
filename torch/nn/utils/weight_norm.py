@@ -27,6 +27,7 @@ class WeightNorm:
     @deprecated(
         "`torch.nn.utils.weight_norm` is deprecated "
         "in favor of `torch.nn.utils.parametrizations.weight_norm`.",
+        category=FutureWarning,
     )
     def apply(module, name: str, dim: int) -> 'WeightNorm':
         for hook in module._forward_pre_hooks.values():
