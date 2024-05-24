@@ -151,7 +151,7 @@ def local_map(
 
         local_args = pytree.tree_unflatten(flat_local_args, args_spec)
 
-        out = func(device_mesh, *local_args, **kwargs)
+        out = func(*local_args, **kwargs)
 
         # process output
         flat_out, out_spec = pytree.tree_flatten(out)
