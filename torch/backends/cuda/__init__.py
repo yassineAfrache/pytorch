@@ -1,7 +1,6 @@
 import contextlib
 
 from typing import Union
-
 from typing_extensions import deprecated
 
 import torch

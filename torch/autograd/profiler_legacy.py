@@ -1,6 +1,5 @@
 import itertools
 from warnings import warn
-
 from typing_extensions import deprecated
 
 import torch

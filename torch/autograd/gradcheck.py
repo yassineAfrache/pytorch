@@ -3,7 +3,6 @@ import functools
 import warnings
 from itertools import product
 from typing import Callable, Dict, Iterable, List, Optional, Tuple, Union
-
 from typing_extensions import deprecated
 
 import torch

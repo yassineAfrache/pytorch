@@ -10,7 +10,6 @@ import unittest
 from types import FunctionType, ModuleType
 from typing import Any, Dict, Optional, Set, Union
 from unittest import mock
-
 from typing_extensions import deprecated
 
 # Types saved/loaded in configs

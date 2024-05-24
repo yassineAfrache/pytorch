@@ -1,6 +1,5 @@
 import operator
 from functools import reduce
-
 from typing_extensions import deprecated
 
 import torch

@@ -2,7 +2,6 @@
 
 import functools
 from typing import List
-
 from typing_extensions import deprecated
 
 import torch

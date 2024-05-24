@@ -14,7 +14,6 @@ from typing import (
     TypeVar,
     Union,
 )
-
 from typing_extensions import deprecated
 
 # No 'default_generator' in torch/__init__.pyi

@@ -9,7 +9,6 @@ import warnings
 from inspect import signature
 
 from typing import Any, Dict, Optional, Tuple, Union
-
 from typing_extensions import deprecated
 
 import torch

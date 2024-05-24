@@ -3,7 +3,6 @@ import os
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import cast, Optional, Union
-
 from typing_extensions import deprecated
 
 import torch
