@@ -192,6 +192,20 @@ class BaseSchedulerNode:
     def debug_str_extra(self) -> str:
         return ""
 
+    def debug_str_short(self) -> str:
+        maybe_data = getattr(self.node, 'data', None)
+        data_str = ""
+        if isinstance(maybe_data, torch._inductor.ir.Pointwise):
+            data_str = ", " + maybe_data.str_helper(
+                [maybe_data.get_size()], shorten=False, multiline=False)
+        elif isinstance(maybe_data, torch._inductor.ir.Reduction):
+            data_str =  ", " + maybe_data.str_helper(
+                [maybe_data.get_reduction_size(), maybe_data.get_reduction_type()], 
+                shorten=False, 
+                multiline=False,
+            )
+        return f"{self}{data_str}"
+
     def log_details(self):
         log.info(
             "%s: unmet_dependencies = %s, writes = %s",
@@ -904,6 +918,9 @@ class FusedSchedulerNode(BaseSchedulerNode):
             lines.extend(debug_triton_code(self))
 
         return textwrap.indent("\n".join(lines).rstrip(), "    ")
+
+    def debug_str_short(self) -> str:
+        return f"{self}, snodes: {list(node.debug_str_short() for node in self.snodes)}"
 
     def set_last_usage(
         self, future_used_buffers: Set[str], mutation_real_name: Dict[str, str]
@@ -1947,6 +1964,9 @@ class Scheduler:
             - self.score_fusion(): assigns priority to a given fusion
         """
         fused_nodes = set(self.nodes)
+        fusion_log.debug('fuse_nodes_once, candidates:')
+        for node in fused_nodes:
+            fusion_log.debug('  ' + node.debug_str_short())
         for node1, node2 in self.get_possible_fusions():
             node1 = self.name_to_fused_node[node1.get_first_name()]
             node2 = self.name_to_fused_node[node2.get_first_name()]
