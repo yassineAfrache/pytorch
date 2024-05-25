@@ -987,10 +987,7 @@ endif()
 message(STATUS "pybind11 include dirs: " "${pybind11_INCLUDE_DIRS}")
 add_library(pybind::pybind11 INTERFACE IMPORTED)
 target_include_directories(pybind::pybind11 SYSTEM INTERFACE ${pybind11_INCLUDE_DIRS})
-target_link_libraries(pybind::pybind11 INTERFACE Python3::Python)
-if(APPLE)
-  target_link_options(pybind::pybind11 INTERFACE -undefined dynamic_lookup)
-endif()
+target_link_libraries(pybind::pybind11 INTERFACE Python3::Module)
 
 # ---[ OpenTelemetry API headers
 find_package(OpenTelemetryApi)
