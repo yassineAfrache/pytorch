@@ -9,8 +9,8 @@ import tokenize
 import unittest
 from types import FunctionType, ModuleType
 from typing import Any, Dict, Optional, Set, Union
-from unittest import mock
 from typing_extensions import deprecated
+from unittest import mock
 
 # Types saved/loaded in configs
 CONFIG_TYPES = (int, float, bool, type(None), str, list, set, tuple, dict)
@@ -155,6 +155,19 @@ class ConfigModule(ModuleType):
         for key in config.get("_save_config_ignore", ()):
             config.pop(key)
         return pickle.dumps(config, protocol=2)
+
+    def save_config_portable(self) -> Dict[str, Any]:
+        """Convert config to portable format"""
+        config: Dict[str, Any] = {}
+        for key in sorted(self._config):
+            if key.startswith("_"):
+                continue
+            if any(
+                key.startswith(e) for e in self._config["_cache_config_ignore_prefix"]
+            ):
+                continue
+            config[key] = self._config[key]
+        return config
 
     def codegen_config(self) -> str:
         """Convert config to Python statements that replicate current config.

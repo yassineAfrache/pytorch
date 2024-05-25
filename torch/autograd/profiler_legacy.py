@@ -1,5 +1,5 @@
 import itertools
-from warnings import warn
+import warnings
 from typing_extensions import deprecated
 
 import torch
@@ -57,7 +57,7 @@ class profile:
         self.with_modules = with_modules
 
         if self.use_cuda and not torch.cuda.is_available():
-            warn("CUDA is not available, disabling CUDA profiling")
+            warnings.warn("CUDA is not available, disabling CUDA profiling")
             self.use_cuda = False
 
         if self.use_cuda:

@@ -6322,7 +6322,7 @@ class LinearUnary(ExternKernelAlloc):
         )
 
     @classmethod
-    def create(cls, x, w, b, attr, scalars, algorithm):
+    def create(cls, x, w, B, attr, scalars, algorithm):
         x = cls.require_contiguous(cls.realize_input(x))
         w = cls.require_contiguous(cls.realize_input(w))
 
@@ -6330,9 +6330,9 @@ class LinearUnary(ExternKernelAlloc):
         oc, ic = w.get_size()
         inputs = [x, w]
         constant_args = [attr, scalars if scalars else [-1], algorithm]
-        if b is not None:
-            b = cls.require_contiguous(cls.realize_input(b))
-            inputs.append(b)
+        if B is not None:
+            B = cls.require_contiguous(cls.realize_input(B))
+            inputs.append(B)
         else:
             constant_args.insert(0, None)
 
@@ -6390,7 +6390,7 @@ class LinearBinary(ExternKernelAlloc):
         )
 
     @classmethod
-    def create(cls, x, y, w, b, attr):
+    def create(cls, x, y, w, B, attr):
         x = cls.require_contiguous(cls.realize_input(x))
         y = cls.require_contiguous(cls.realize_input(y))
         w = cls.require_contiguous(cls.realize_input(w))
@@ -6400,11 +6400,11 @@ class LinearBinary(ExternKernelAlloc):
 
         inputs = [x, y, w]
         constant_args = [attr]
-        if b is not None:
-            b = cls.require_contiguous(cls.realize_input(b))
-            inputs.append(b)
+        if B is not None:
+            B = cls.require_contiguous(cls.realize_input(B))
+            inputs.append(B)
         else:
-            constant_args.insert(0, b)
+            constant_args.insert(0, B)
 
         return LinearBinary(
             layout=FlexibleLayout(
